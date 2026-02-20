@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../data/product_repo.dart';
 
 class ProductListPage extends StatefulWidget {
   const ProductListPage({super.key});
@@ -8,21 +10,15 @@ class ProductListPage extends StatefulWidget {
 }
 
 class _ProductListPageState extends State<ProductListPage> {
-  static const _titleColor = Color(0xFF1D1C3B);
+  static const titleColor = Color(0xFF1D1C3B);
 
   int selectedTab = 0;
-
   final tabs = const ["New", "Furniture", "Electronic", "Fashion"];
-
-  final products = const [
-    _Product(price: "\$879.00", bg: Color(0xFFD8F3FF), asset: "assets/images/chair.png"),
-    _Product(price: "\$2800.00", bg: Color(0xFFF7DDD2), asset: "assets/images/bike.png"),
-    _Product(price: "\$219.00", bg: Color(0xFFF6E3B6), asset: "assets/images/bottle.png"),
-    _Product(price: "\$165.00", bg: Color(0xFFDFF6F3), asset: "assets/images/bag.png"),
-  ];
 
   @override
   Widget build(BuildContext context) {
+    final products = ProductRepo.products;
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -30,28 +26,18 @@ class _ProductListPageState extends State<ProductListPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // top row: title + search
               Row(
                 children: [
                   const Text(
                     "Product List",
-                    style: TextStyle(
-                      fontSize: 34,
-                      fontWeight: FontWeight.w800,
-                      color: _titleColor,
-                    ),
+                    style: TextStyle(fontSize: 34, fontWeight: FontWeight.w800, color: titleColor),
                   ),
                   const Spacer(),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.search, size: 26),
-                  ),
+                  IconButton(onPressed: () {}, icon: const Icon(Icons.search, size: 26)),
                 ],
               ),
-
               const SizedBox(height: 10),
 
-              // tabs + grid icon
               Row(
                 children: [
                   Expanded(
@@ -73,9 +59,7 @@ class _ProductListPageState extends State<ProductListPage> {
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                                    color: active
-                                        ? _titleColor
-                                        : _titleColor.withValues(alpha: 0.45),
+                                    color: active ? titleColor : titleColor.withValues(alpha: 0.45),
                                   ),
                                 ),
                                 const SizedBox(height: 6),
@@ -105,7 +89,6 @@ class _ProductListPageState extends State<ProductListPage> {
 
               const SizedBox(height: 18),
 
-              // grid
               Expanded(
                 child: GridView.builder(
                   padding: const EdgeInsets.only(bottom: 16),
@@ -116,75 +99,50 @@ class _ProductListPageState extends State<ProductListPage> {
                     mainAxisSpacing: 18,
                     childAspectRatio: 0.72,
                   ),
-                  itemBuilder: (context, i) => _ProductCard(p: products[i]),
+                  itemBuilder: (context, i) {
+                    final p = products[i];
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(24),
+                      onTap: () => context.go('/products/${p.id}'),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: p.bg,
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              padding: const EdgeInsets.all(18),
+                              child: Center(
+                                child: Image.asset(
+                                  p.asset,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (_, __, ___) =>
+                                  const Icon(Icons.image_outlined, size: 44),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Text(p.price,
+                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                              const Spacer(),
+                              const Icon(Icons.more_horiz, color: Colors.grey),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
           ),
         ),
       ),
-    );
-  }
-}
-
-class _Product {
-  final String price;
-  final Color bg;
-  final String asset;
-  const _Product({required this.price, required this.bg, required this.asset});
-}
-
-class _ProductCard extends StatelessWidget {
-  final _Product p;
-  const _ProductCard({required this.p});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // colored card
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color: p.bg,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            padding: const EdgeInsets.all(18),
-            child: Center(
-              child: _AssetOrPlaceholder(asset: p.asset),
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 10),
-
-        // price + more
-        Row(
-          children: [
-            Text(
-              p.price,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-            ),
-            const Spacer(),
-            const Icon(Icons.more_horiz, color: Colors.grey),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _AssetOrPlaceholder extends StatelessWidget {
-  final String asset;
-  const _AssetOrPlaceholder({required this.asset});
-
-  @override
-  Widget build(BuildContext context) {
-    return Image.asset(
-      asset,
-      fit: BoxFit.contain,
-      errorBuilder: (_, __, ___) => const Icon(Icons.image_outlined, size: 44),
     );
   }
 }

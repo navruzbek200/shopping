@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
-import 'welcome_page.dart';
+import 'router/app_router.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: Colors.white,
-      ),
-      home: const WelcomePage(),
+      routerConfig: AppRouter.router,
+      theme: ThemeData(useMaterial3: true),
     );
   }
 }
